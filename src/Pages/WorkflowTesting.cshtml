@@ -8,42 +8,73 @@
 <h1>@ViewData["Title"]</h1>
 
 <form method="post">
+    
     <div>
-        <label for="inputProducts">Input Products:</label>
-        <input type="text" id="inputProducts" name="inputProducts" />
+        <label for="InputItems">Custom Input:</label>
+        <input type="text" id="workflowRules" name="InputItems" />
     </div>
     <div>
-        <label for="workflowRules">Workflow Rules:</label>
-        <input type="text" id="workflowRules" name="workflowRules" />
+        <label for="InputProductsDropdown">Preset Inputs:</label>
+        <select id="inputProducts" name="InputProductsDropdown">
+            @foreach (var inputProduct in Model.PresetInputsList)
+            {
+                <option value="@inputProduct.Id">@inputProduct.DisplayText</option>
+            }
+        </select>
     </div>
     <div>
-        <label for="presetRules">Preset Ruleset:</label>
-        <select id="presetRules" name="presetRules">
-            @foreach (var presetRule in Model.PresetRules)
+        <label for="WorkflowRules">Custom Workflow Ruleset:</label>
+        <input type="text" id="workflowRules" name="WorkflowRules" />
+    </div>
+    <div>
+        <label for="PresetRulesDropdown">Preset Ruleset:</label>
+        <select id="presetRules" name="PresetRulesDropdown"  onchange="updatePresetRulesTextInput()">
+            @foreach (var presetRule in Model.PresetRulesList)
             {
                 <option value="@presetRule.Id">@presetRule.DisplayText</option>
             }
         </select>
     </div>
-    <div>
-        <label for="presetInputs">Preset Inputs:</label>
-        <select id="presetInputs" name="presetInputs">
-            @foreach (var presetInput in Model.PresetInputs)
-            {
-                <option value="@presetInput.Id">@presetInput.DisplayText</option>
-            }
-        </select>
-    </div>
+
     <button type="submit">Submit</button>
 </form>
+
+<script>
+    function updatePresetRulesTextInput() {
+        var selectElement = document.getElementById('presetRules');
+        var selectedRuleId = selectElement.value;
+
+        fetch(`/YourController/GetRuleJson?ruleId=${selectedRuleId}`)
+            .then(response => response.text())
+            .then(ruleJson => {
+                var textInput = document.getElementById('workflowRules');
+                textInput.value = ruleJson;
+            });
+    }
+</script>
 
 @if (Model.Output != null)
 {
     <h2>Output:</h2>
+    @if (Model.Output != null && !string.IsNullOrEmpty(Model.Output.Message))
+    {
+    <p>Message: @Html.Raw(Model.Output.Message)</p>
+    }
     <ul>
-        @foreach (var product in Model.Output.Products)
+        @if (Model.Output != null && !string.IsNullOrEmpty(Model.Output.OutputError))
         {
-            <li>@product.Name - @product.Price (@product.BasePrice)</li>
+        <li>ERROR: @Model.Output.OutputError</li>
+        } else
+        {
+            @if (Model.Output == null || Model.Output.Products == null || Model.Output.Products.Count == 0)
+            {
+        <li>No products found</li>
+            }else{
+                @foreach (var product in Model.Output.Products)
+                {
+        <li>@product.Name - @product.Price (@product.BasePrice)</li>
+                }
+            }
         }
     </ul>
 }

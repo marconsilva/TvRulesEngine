@@ -7,6 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="RulesEngine" Version="5.0.2" />
     <PackageReference Include="RulesEngineEditor" Version="1.4.0" />
   </ItemGroup>
