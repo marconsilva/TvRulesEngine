@@ -64,7 +64,8 @@ public class WorkflowBenchmark : PageModel
         StringBuilder sb = new StringBuilder();
         BenchmarksDropdownElements = defaultBenchmarks;
 
-        
+        Output = new ResultOutput();
+
         if(BenchmarksDropdownSelectedGuid != null && BenchmarksDropdownSelectedGuid != Guid.Empty)
         {
             selectedBenchmark = defaultBenchmarks.FirstOrDefault(x => x.BenchmarkId == BenchmarksDropdownSelectedGuid);
@@ -78,6 +79,7 @@ public class WorkflowBenchmark : PageModel
 
             var rulesEngine = new RulesEngine.RulesEngine(workflows, null);
             
+            List<TimeSpan> workItemElapsedTimes = new List<TimeSpan>();
             Stopwatch globalTimer = new Stopwatch();
             int workCounter = 0;
             int workId = 0;
@@ -90,17 +92,21 @@ public class WorkflowBenchmark : PageModel
                 {
                     Parallel.ForEach(selectedBenchmark.CatalogItems, item =>
                     {   
+                        Stopwatch workTimer = new Stopwatch();
                         var localWorkId = workId++;
+                        workTimer.Start();
                         selectedBenchmark.CatalogItems.Select(item =>
                             rulesEngine.ExecuteAllRulesAsync(
                                 selectedBenchmark.BenchmarkTestDisplayText,
                                 item, user, selectedBenchmark.DiscountCodes));
+                        workTimer.Stop();
                         BenchmarkDataPoints.Add(new BenchmarkDataPoint() 
                         {
                              ElapsedMilliseconds =  globalTimer.ElapsedMilliseconds,
                              WorkCommissionedID = localWorkId,
                              WorkDone = workCounter++,
-                        });;
+                        });
+                        workItemElapsedTimes.Add(workTimer.Elapsed);
                     });
                 });
             }else
@@ -109,21 +115,41 @@ public class WorkflowBenchmark : PageModel
                 {
                     foreach(var item in selectedBenchmark.CatalogItems)
                     {
+                        Stopwatch workTimer = new Stopwatch();
                         var localWorkId = workId++;
+                        workTimer.Start();
                         List<RuleResultTree> resultList = rulesEngine.ExecuteAllRulesAsync(
-                        selectedBenchmark.BenchmarkTestDisplayText,
-                        item, user, selectedBenchmark.DiscountCodes).Result;
+                            selectedBenchmark.BenchmarkTestDisplayText,
+                            item, user, selectedBenchmark.DiscountCodes).Result;
+                        workTimer.Stop();
                         BenchmarkDataPoints.Add(new BenchmarkDataPoint() 
                         {
                              ElapsedMilliseconds =  globalTimer.ElapsedMilliseconds,
                              WorkCommissionedID = localWorkId,
                              WorkDone = workCounter++,
                         });;
+                        workItemElapsedTimes.Add(workTimer.Elapsed);
                     }
                 }
             }
 
             globalTimer.Stop();
+
+            TimeSpan averageElapsedTime = new TimeSpan();
+            foreach(var item in workItemElapsedTimes)
+            {
+                averageElapsedTime += item;
+            }
+            averageElapsedTime = new TimeSpan(averageElapsedTime.Ticks / workItemElapsedTimes.Count);
+
+            sb.AppendLine($"Benchmark: {selectedBenchmark.BenchmarkTestDisplayText}<br/>");
+            sb.AppendLine($"WorkDone: {workCounter} workItems<br/>");
+            sb.AppendLine($"Total Elapsed Time: {globalTimer.Elapsed.ToString()} workItems<br/>");
+            sb.AppendLine($"Average WorkItem Elapsed Time: {averageElapsedTime.ToString()}<br/>");
+            sb.AppendLine($"Min WorkItem Elapsed Time: {workItemElapsedTimes.Min().ToString()}<br/>");
+            sb.AppendLine($"Max WorkItem Elapsed Time: {workItemElapsedTimes.Max().ToString()}<br/>");
+
+            Output.OutputText = sb.ToString();
         }
     }
 
@@ -234,10 +260,10 @@ public class WorkflowBenchmark : PageModel
             defaultBenchmarks.Add(benchmark2);
         #endregion
 
-        // Benchmark 20K Catalog Items (Sequencial)
-        #region Benchmark 20K Catalog Items (Sequential)
+        // Benchmark 40K Catalog Items (Sequential)
+        #region Benchmark 40K Catalog Items (Sequential)
         DefaultBenchmark benchmark3 = new DefaultBenchmark() { 
-            BenchmarkTestDisplayText = "Benchmark 10k users (Sequential)", 
+            BenchmarkTestDisplayText = "Benchmark 40k Catalog Items (Sequential)", 
             IsParallel = false,
             BenchmarkId = Guid.NewGuid(),
             CatalogItems =  new List<CatalogItem>(), 
@@ -264,7 +290,7 @@ public class WorkflowBenchmark : PageModel
                 }
             };
 
-            for(int i = 0; i<20000; i++)
+            for(int i = 0; i<40000; i++)
             {
                 benchmark3.CatalogItems.Add(new CatalogItem() 
                 {
@@ -284,10 +310,10 @@ public class WorkflowBenchmark : PageModel
             defaultBenchmarks.Add(benchmark3);
         #endregion
         
-        // Benchmark 20K Catalog Items (Paralel)
-        #region Benchmark 20K Catalog Items (Parallel)
+        // Benchmark 40K Catalog Items (Parallel)
+        #region Benchmark 40K Catalog Items (Parallel)
         DefaultBenchmark benchmark4 = new DefaultBenchmark() { 
-            BenchmarkTestDisplayText = "Benchmark 10k users (Parallel)", 
+            BenchmarkTestDisplayText = "Benchmark 40k Catalog Items (Parallel)", 
             IsParallel = true,
             BenchmarkId = Guid.NewGuid(),
             CatalogItems =  new List<CatalogItem>(), 

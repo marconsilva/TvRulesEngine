@@ -30,21 +30,37 @@
 
 </form>
 
-<canvas id="myChart"></canvas>
+<div>
+    @if (Model.Output != null)
+{
+    <h2>Benchmark Test Results:</h2>
+    @if (Model.Output != null && !Model.Output.isError && !string.IsNullOrEmpty(Model.Output.OutputText))
+    {
+    <p>Message: @Html.Raw(Model.Output.OutputText)</p>
+    }else if(Model.Output != null)
+    {
+    <p>Erro Message: @Html.Raw(Model.Output.ErrorMessage)</p>
+    }   
+}
+</div>
+
+
 
 @if(Model.BenchmarkDataPoints != null && Model.BenchmarkDataPoints.Count > 0)
 {
+    <h2>Benchmark Test Results Chart:</h2>
 
+    <canvas id="myChart"></canvas>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         var ctx = document.getElementById('myChart').getContext('2d');
         var chart = new Chart(ctx, {
             type: 'line', // Change this to the type of chart you want
             data: {
-                labels: @Html.Raw(Json.Serialize(Model.BenchmarkDataPoints.Select(p => p.ElapsedMilliseconds))),
+                labels: @Html.Raw(Json.Serialize(Model.BenchmarkDataPoints.Select(p => p.WorkDone))),
                 datasets: [{
                     label: 'My Dataset',
-                    data: @Html.Raw(Json.Serialize(Model.BenchmarkDataPoints.Select(p => p.WorkDone))),
+                    data: @Html.Raw(Json.Serialize(Model.BenchmarkDataPoints.Select(p => p.ElapsedMilliseconds))),
                     // Add more options here
                 }]
             },
