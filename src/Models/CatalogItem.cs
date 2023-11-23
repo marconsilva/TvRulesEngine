@@ -1,5 +1,3 @@
-using Microsoft.VisualBasic;
-
 namespace sampleRulesEngine.Models
 {
     public class CatalogItem
@@ -12,7 +10,9 @@ namespace sampleRulesEngine.Models
         public bool IsSubscription { get; set; }
         public bool IsDiscountable { get; set; }
         public bool IsBundle { get; set; }
+        public string ItemType { get; set; }
         public List<string> Tags { get; set; }
+        public List<string> AssociatedDiscountCodes { get; set; }
     
         public CatalogItem()
         {

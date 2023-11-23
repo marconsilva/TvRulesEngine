@@ -4,77 +4,64 @@
     ViewData["Title"] = "Microsoft Rules Engine Testing Page";
 }
 @using RulesEngineEditor.Pages
+@using Newtonsoft.Json
 
 <h1>@ViewData["Title"]</h1>
 
-<form method="post">
+<form method="post" id="mainForm">
     
     <div>
-        <label for="InputItems">Custom Input:</label>
-        <input type="text" id="workflowRules" name="InputItems" />
-    </div>
-    <div>
-        <label for="InputProductsDropdown">Preset Inputs:</label>
-        <select id="inputProducts" name="InputProductsDropdown">
-            @foreach (var inputProduct in Model.PresetInputsList)
+        <label for="InputsDropdownSelectedGuid">Select Case to test:</label>
+        <select id="defaultInputs" name="InputsDropdownSelectedGuid" onchange="this.form.submit()">
+            @foreach (var inputProduct in Model.InputsDropdownElements)
             {
-                <option value="@inputProduct.Id">@inputProduct.DisplayText</option>
-            }
-        </select>
-    </div>
-    <div>
-        <label for="WorkflowRules">Custom Workflow Ruleset:</label>
-        <input type="text" id="workflowRules" name="WorkflowRules" />
-    </div>
-    <div>
-        <label for="PresetRulesDropdown">Preset Ruleset:</label>
-        <select id="presetRules" name="PresetRulesDropdown"  onchange="updatePresetRulesTextInput()">
-            @foreach (var presetRule in Model.PresetRulesList)
-            {
-                <option value="@presetRule.Id">@presetRule.DisplayText</option>
+                if(Model.InputsDropdownSelectedGuid == inputProduct.InputId)
+                {
+                    <option value="@inputProduct.InputId" selected>@inputProduct.InputDisplayText</option>
+                }else
+                {
+                    <option value="@inputProduct.InputId">@inputProduct.InputDisplayText</option>
+                }
             }
         </select>
     </div>
 
     <button type="submit">Submit</button>
-</form>
 
-<script>
-    function updatePresetRulesTextInput() {
-        var selectElement = document.getElementById('presetRules');
-        var selectedRuleId = selectElement.value;
+    @if(Model.InputsDropdownSelected != null)
+    {
+    <div>
+        <h2>Input Items:</h2>
+        <textarea id="inputItemsJson" name="inputItemsJson" rows="5" cols="200">
+            @JsonConvert.SerializeObject(Model.InputsDropdownSelected.CatalogItems)
+        </textarea>
+        <h2>Input Users:</h2>
+        <textarea id="inputUsersJson" name="inputUsersJson" rows="5" cols="200">
+            @JsonConvert.SerializeObject(Model.InputsDropdownSelected.UsersInfo)
+        </textarea>
+        
+        <h2>Discount Codes:</h2>
+        <textarea id="inputDiscountCodesJson" name="inputDiscountCodesJson" rows="2" cols="200">
+            @JsonConvert.SerializeObject(Model.InputsDropdownSelected.DiscontCodes)
+        </textarea>
 
-        fetch(`/YourController/GetRuleJson?ruleId=${selectedRuleId}`)
-            .then(response => response.text())
-            .then(ruleJson => {
-                var textInput = document.getElementById('workflowRules');
-                textInput.value = ruleJson;
-            });
+        <h2>Input Rules:</h2>
+        <textarea id="inputRulesJson" name="inputRulesJson" rows="5" cols="200">
+            @JsonConvert.SerializeObject(Model.InputsDropdownSelected.Rules)
+        </textarea>
+        
+    </div>
     }
-</script>
+</form>
 
 @if (Model.Output != null)
 {
     <h2>Output:</h2>
-    @if (Model.Output != null && !string.IsNullOrEmpty(Model.Output.Message))
+    @if (Model.Output != null && !Model.Output.isError && !string.IsNullOrEmpty(Model.Output.OutputText))
     {
-    <p>Message: @Html.Raw(Model.Output.Message)</p>
+    <p>Message: @Html.Raw(Model.Output.OutputText)</p>
+    }else if(Model.Output != null)
+    {
+    <p>Erro Message: @Html.Raw(Model.Output.ErrorMessage)</p>
     }
-    <ul>
-        @if (Model.Output != null && !string.IsNullOrEmpty(Model.Output.OutputError))
-        {
-        <li>ERROR: @Model.Output.OutputError</li>
-        } else
-        {
-            @if (Model.Output == null || Model.Output.Products == null || Model.Output.Products.Count == 0)
-            {
-        <li>No products found</li>
-            }else{
-                @foreach (var product in Model.Output.Products)
-                {
-        <li>@product.Name - @product.Price (@product.BasePrice)</li>
-                }
-            }
-        }
-    </ul>
 }
