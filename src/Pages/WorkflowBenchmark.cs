@@ -235,9 +235,9 @@ public class WorkflowBenchmark : PageModel
         #endregion
 
         // Benchmark 20K Catalog Items (Sequencial)
-        #region Benchmark 20K Catalog Items (Sequencial)
+        #region Benchmark 20K Catalog Items (Sequential)
         DefaultBenchmark benchmark3 = new DefaultBenchmark() { 
-            BenchmarkTestDisplayText = "Benchmark 10k users (Sequencial)", 
+            BenchmarkTestDisplayText = "Benchmark 10k users (Sequential)", 
             IsParallel = false,
             BenchmarkId = Guid.NewGuid(),
             CatalogItems =  new List<CatalogItem>(), 
@@ -285,9 +285,9 @@ public class WorkflowBenchmark : PageModel
         #endregion
         
         // Benchmark 20K Catalog Items (Paralel)
-        #region Benchmark 20K Catalog Items (Paralel)
+        #region Benchmark 20K Catalog Items (Parallel)
         DefaultBenchmark benchmark4 = new DefaultBenchmark() { 
-            BenchmarkTestDisplayText = "Benchmark 10k users (Sequencial)", 
+            BenchmarkTestDisplayText = "Benchmark 10k users (Parallel)", 
             IsParallel = true,
             BenchmarkId = Guid.NewGuid(),
             CatalogItems =  new List<CatalogItem>(), 
