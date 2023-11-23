@@ -88,7 +88,7 @@ public class WorkflowTesting : PageModel
                 {
                     List<RuleResultTree> resultList = rulesEngine.ExecuteAllRulesAsync(
                         selectedInput.InputDisplayText,
-                        item, user, selectedInput.DiscontCodes).Result;
+                        item, user, selectedInput.DiscountCodes).Result;
                     
                     outcome = resultList.TrueForAll(r => r.IsSuccess);
 
@@ -714,7 +714,7 @@ public class WorkflowTesting : PageModel
                     UserSinceDate = DateTime.Now.AddDays(-30)
                     }
                 },
-             DiscontCodes = new DiscountCodes() { 
+             DiscountCodes = new DiscountCodes() { 
                 ActiveDiscountCodes = new List<string>() { "DISCOUNT1" },
                 SelectedDiscountCode = "DISCOUNT1"
              }
@@ -774,7 +774,7 @@ public class WorkflowTesting : PageModel
                     UserSinceDate = DateTime.Now.AddDays(-30)
                     }
                 },
-             DiscontCodes = new DiscountCodes() { 
+             DiscountCodes = new DiscountCodes() { 
                 ActiveDiscountCodes = new List<string>() { "DISCOUNT1" },
                 SelectedDiscountCode = "DISCOUNT1"
              }
@@ -854,7 +854,7 @@ public class WorkflowTesting : PageModel
                     UserSinceDate = DateTime.Now.AddDays(-30)
                     },
                 },
-             DiscontCodes = new DiscountCodes() { 
+             DiscountCodes = new DiscountCodes() { 
                 ActiveDiscountCodes = new List<string>() { "DISCOUNT1" },
                 SelectedDiscountCode = "DISCOUNT1"
              }
